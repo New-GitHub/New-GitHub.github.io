@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="KVM virtual machine snapshot backup"/>
+
+
+
+
+  <meta name="keywords" content="kvm, convert, backup, 记忆博客" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="记忆博客">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://c-cc-ccc.cc/KVM-Virtualization/KVM-virtual-machine-snapshot-backup.html"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+  <link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> KVM virtual machine snapshot backup - 记忆博客 </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">记忆博客</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            首页
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            归档
+          
+        </li>
+      </a>
+    
+      <a href="/tags">
+        <li class="mobile-menu-item">
+          
+          
+            标签
+          
+        </li>
+      </a>
+    
+      <a href="/categories">
+        <li class="mobile-menu-item">
+          
+          
+            分类
+          
+        </li>
+      </a>
+    
+      <a href="/about">
+        <li class="mobile-menu-item">
+          
+          
+            关于
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">记忆博客</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              首页
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              归档
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/tags">
+            
+            
+              标签
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/categories">
+            
+            
+              分类
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/about">
+            
+            
+              关于
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          KVM virtual machine snapshot backup
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-12-05
+        </span>
+        
+          <div class="post-category">
+            
+              <a href="/categories/KVM-Virtualization/">KVM Virtualization</a>
+            
+          </div>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#KVM虚拟机快照备份"><span class="toc-text"><a href="#KVM&#x865A;&#x62DF;&#x673A;&#x5FEB;&#x7167;&#x5907;&#x4EFD;" class="headerlink" title="KVM&#x865A;&#x62DF;&#x673A;&#x5FEB;&#x7167;&#x5907;&#x4EFD;"></a>KVM&#x865A;&#x62DF;&#x673A;&#x5FEB;&#x7167;&#x5907;&#x4EFD;</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#查看现有磁盘镜像格式与转换"><span class="toc-text"><a href="#&#x67E5;&#x770B;&#x73B0;&#x6709;&#x78C1;&#x76D8;&#x955C;&#x50CF;&#x683C;&#x5F0F;&#x4E0E;&#x8F6C;&#x6362;" class="headerlink" title="&#x67E5;&#x770B;&#x73B0;&#x6709;&#x78C1;&#x76D8;&#x955C;&#x50CF;&#x683C;&#x5F0F;&#x4E0E;&#x8F6C;&#x6362;"></a>&#x67E5;&#x770B;&#x73B0;&#x6709;&#x78C1;&#x76D8;&#x955C;&#x50CF;&#x683C;&#x5F0F;&#x4E0E;&#x8F6C;&#x6362;</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#查看磁盘格式"><span class="toc-text"><a href="#&#x67E5;&#x770B;&#x78C1;&#x76D8;&#x683C;&#x5F0F;" class="headerlink" title="&#x67E5;&#x770B;&#x78C1;&#x76D8;&#x683C;&#x5F0F;"></a>&#x67E5;&#x770B;&#x78C1;&#x76D8;&#x683C;&#x5F0F;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#raw格式需要转换成qcow2"><span class="toc-text"><a href="#raw&#x683C;&#x5F0F;&#x9700;&#x8981;&#x8F6C;&#x6362;&#x6210;qcow2" class="headerlink" title="raw&#x683C;&#x5F0F;&#x9700;&#x8981;&#x8F6C;&#x6362;&#x6210;qcow2"></a>raw&#x683C;&#x5F0F;&#x9700;&#x8981;&#x8F6C;&#x6362;&#x6210;qcow2</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#修改虚拟机配置文件"><span class="toc-text"><a href="#&#x4FEE;&#x6539;&#x865A;&#x62DF;&#x673A;&#x914D;&#x7F6E;&#x6587;&#x4EF6;" class="headerlink" title="&#x4FEE;&#x6539;&#x865A;&#x62DF;&#x673A;&#x914D;&#x7F6E;&#x6587;&#x4EF6;"></a>&#x4FEE;&#x6539;&#x865A;&#x62DF;&#x673A;&#x914D;&#x7F6E;&#x6587;&#x4EF6;</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#对虚拟机进行快照管理"><span class="toc-text"><a href="#&#x5BF9;&#x865A;&#x62DF;&#x673A;&#x8FDB;&#x884C;&#x5FEB;&#x7167;&#x7BA1;&#x7406;" class="headerlink" title="&#x5BF9;&#x865A;&#x62DF;&#x673A;&#x8FDB;&#x884C;&#x5FEB;&#x7167;&#x7BA1;&#x7406;"></a>&#x5BF9;&#x865A;&#x62DF;&#x673A;&#x8FDB;&#x884C;&#x5FEB;&#x7167;&#x7BA1;&#x7406;</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#虚拟机创建快照-as-添加TAG"><span class="toc-text"><a href="#&#x865A;&#x62DF;&#x673A;&#x521B;&#x5EFA;&#x5FEB;&#x7167;-as-&#x6DFB;&#x52A0;TAG" class="headerlink" title="&#x865A;&#x62DF;&#x673A;&#x521B;&#x5EFA;&#x5FEB;&#x7167; -as &#x6DFB;&#x52A0;TAG"></a>&#x865A;&#x62DF;&#x673A;&#x521B;&#x5EFA;&#x5FEB;&#x7167; -as &#x6DFB;&#x52A0;TAG</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#查看虚拟机镜像快照的版本"><span class="toc-text"><a href="#&#x67E5;&#x770B;&#x865A;&#x62DF;&#x673A;&#x955C;&#x50CF;&#x5FEB;&#x7167;&#x7684;&#x7248;&#x672C;" class="headerlink" title="&#x67E5;&#x770B;&#x865A;&#x62DF;&#x673A;&#x955C;&#x50CF;&#x5FEB;&#x7167;&#x7684;&#x7248;&#x672C;"></a>&#x67E5;&#x770B;&#x865A;&#x62DF;&#x673A;&#x955C;&#x50CF;&#x5FEB;&#x7167;&#x7684;&#x7248;&#x672C;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#查看当前虚拟机镜像快照的版本"><span class="toc-text"><a href="#&#x67E5;&#x770B;&#x5F53;&#x524D;&#x865A;&#x62DF;&#x673A;&#x955C;&#x50CF;&#x5FEB;&#x7167;&#x7684;&#x7248;&#x672C;" class="headerlink" title="&#x67E5;&#x770B;&#x5F53;&#x524D;&#x865A;&#x62DF;&#x673A;&#x955C;&#x50CF;&#x5FEB;&#x7167;&#x7684;&#x7248;&#x672C;"></a>&#x67E5;&#x770B;&#x5F53;&#x524D;&#x865A;&#x62DF;&#x673A;&#x955C;&#x50CF;&#x5FEB;&#x7167;&#x7684;&#x7248;&#x672C;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#查看当前虚拟机镜像文件"><span class="toc-text"><a href="#&#x67E5;&#x770B;&#x5F53;&#x524D;&#x865A;&#x62DF;&#x673A;&#x955C;&#x50CF;&#x6587;&#x4EF6;" class="headerlink" title="&#x67E5;&#x770B;&#x5F53;&#x524D;&#x865A;&#x62DF;&#x673A;&#x955C;&#x50CF;&#x6587;&#x4EF6;"></a>&#x67E5;&#x770B;&#x5F53;&#x524D;&#x865A;&#x62DF;&#x673A;&#x955C;&#x50CF;&#x6587;&#x4EF6;</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#恢复虚拟机快照"><span class="toc-text"><a href="#&#x6062;&#x590D;&#x865A;&#x62DF;&#x673A;&#x5FEB;&#x7167;" class="headerlink" title="&#x6062;&#x590D;&#x865A;&#x62DF;&#x673A;&#x5FEB;&#x7167;"></a>&#x6062;&#x590D;&#x865A;&#x62DF;&#x673A;&#x5FEB;&#x7167;</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#恢复虚拟机快照必须关闭虚拟机"><span class="toc-text"><a href="#&#x6062;&#x590D;&#x865A;&#x62DF;&#x673A;&#x5FEB;&#x7167;&#x5FC5;&#x987B;&#x5173;&#x95ED;&#x865A;&#x62DF;&#x673A;" class="headerlink" title="&#x6062;&#x590D;&#x865A;&#x62DF;&#x673A;&#x5FEB;&#x7167;&#x5FC5;&#x987B;&#x5173;&#x95ED;&#x865A;&#x62DF;&#x673A;"></a>&#x6062;&#x590D;&#x865A;&#x62DF;&#x673A;&#x5FEB;&#x7167;&#x5FC5;&#x987B;&#x5173;&#x95ED;&#x865A;&#x62DF;&#x673A;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#确认需要恢复的快照版本名称"><span class="toc-text"><a href="#&#x786E;&#x8BA4;&#x9700;&#x8981;&#x6062;&#x590D;&#x7684;&#x5FEB;&#x7167;&#x7248;&#x672C;&#x540D;&#x79F0;" class="headerlink" title="&#x786E;&#x8BA4;&#x9700;&#x8981;&#x6062;&#x590D;&#x7684;&#x5FEB;&#x7167;&#x7248;&#x672C;&#x540D;&#x79F0;"></a>&#x786E;&#x8BA4;&#x9700;&#x8981;&#x6062;&#x590D;&#x7684;&#x5FEB;&#x7167;&#x7248;&#x672C;&#x540D;&#x79F0;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#执行恢复并确认恢复版本"><span class="toc-text"><a href="#&#x6267;&#x884C;&#x6062;&#x590D;&#x5E76;&#x786E;&#x8BA4;&#x6062;&#x590D;&#x7248;&#x672C;" class="headerlink" title="&#x6267;&#x884C;&#x6062;&#x590D;&#x5E76;&#x786E;&#x8BA4;&#x6062;&#x590D;&#x7248;&#x672C;"></a>&#x6267;&#x884C;&#x6062;&#x590D;&#x5E76;&#x786E;&#x8BA4;&#x6062;&#x590D;&#x7248;&#x672C;</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#删除虚拟机快照"><span class="toc-text"><a href="#&#x5220;&#x9664;&#x865A;&#x62DF;&#x673A;&#x5FEB;&#x7167;" class="headerlink" title="&#x5220;&#x9664;&#x865A;&#x62DF;&#x673A;&#x5FEB;&#x7167;"></a>&#x5220;&#x9664;&#x865A;&#x62DF;&#x673A;&#x5FEB;&#x7167;</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#查看虚拟机快照"><span class="toc-text"><a href="#&#x67E5;&#x770B;&#x865A;&#x62DF;&#x673A;&#x5FEB;&#x7167;" class="headerlink" title="&#x67E5;&#x770B;&#x865A;&#x62DF;&#x673A;&#x5FEB;&#x7167;"></a>&#x67E5;&#x770B;&#x865A;&#x62DF;&#x673A;&#x5FEB;&#x7167;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#删除快照"><span class="toc-text"><a href="#&#x5220;&#x9664;&#x5FEB;&#x7167;" class="headerlink" title="&#x5220;&#x9664;&#x5FEB;&#x7167;"></a>&#x5220;&#x9664;&#x5FEB;&#x7167;</span></a></li></ol></li></ol></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <h1 id="KVM虚拟机快照备份"><a href="#KVM虚拟机快照备份" class="headerlink" title="KVM虚拟机快照备份"></a>KVM虚拟机快照备份</h1><pre><code>kvm虚拟机默认使用raw格式的镜像格式，性能最好，速度最快，它的缺点就是不支持一些新的功能，如支持镜像,zlib磁盘压缩,AES加密等。要使用镜像功能，磁盘格式必须为qcow2。
+</code></pre><h2 id="查看现有磁盘镜像格式与转换"><a href="#查看现有磁盘镜像格式与转换" class="headerlink" title="查看现有磁盘镜像格式与转换"></a>查看现有磁盘镜像格式与转换</h2><h3 id="查看磁盘格式"><a href="#查看磁盘格式" class="headerlink" title="查看磁盘格式"></a>查看磁盘格式</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-img info linux.img</span><br></pre></td></tr></table></figure>
+<h3 id="raw格式需要转换成qcow2"><a href="#raw格式需要转换成qcow2" class="headerlink" title="raw格式需要转换成qcow2"></a>raw格式需要转换成qcow2</h3><a id="more"></a>
+<pre><code>注: 关闭虚拟机并转换磁盘
+</code></pre><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-img convert -f raw -O qcow2 linux.img linux.qcow2</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-f  源镜像的格式  </span><br><span class="line">-O 目标镜像的格式</span><br></pre></td></tr></table></figure>
+<h2 id="修改虚拟机配置文件"><a href="#修改虚拟机配置文件" class="headerlink" title="修改虚拟机配置文件"></a>修改虚拟机配置文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">virsh edit linux</span><br><span class="line">&lt;driver name=<span class="string">'qemu'</span> <span class="built_in">type</span>=<span class="string">'qcow2'</span> cache=<span class="string">'none'</span>/&gt;</span><br><span class="line">&lt;<span class="built_in">source</span> file=<span class="string">'/usr/local/src/linux.qcow2'</span>/&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="对虚拟机进行快照管理"><a href="#对虚拟机进行快照管理" class="headerlink" title="对虚拟机进行快照管理"></a>对虚拟机进行快照管理</h2><h3 id="虚拟机创建快照-as-添加TAG"><a href="#虚拟机创建快照-as-添加TAG" class="headerlink" title="虚拟机创建快照 -as 添加TAG"></a>虚拟机创建快照 -as 添加TAG</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virsh snapshot-create linux</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virsh snapshot-create-as linux login</span><br></pre></td></tr></table></figure>
+<h3 id="查看虚拟机镜像快照的版本"><a href="#查看虚拟机镜像快照的版本" class="headerlink" title="查看虚拟机镜像快照的版本"></a>查看虚拟机镜像快照的版本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virsh snapshot-list linux</span><br></pre></td></tr></table></figure>
+<h3 id="查看当前虚拟机镜像快照的版本"><a href="#查看当前虚拟机镜像快照的版本" class="headerlink" title="查看当前虚拟机镜像快照的版本"></a>查看当前虚拟机镜像快照的版本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">virsh snapshot-current linux</span><br><span class="line">&lt;name&gt;1491237978&lt;/name&gt;</span><br></pre></td></tr></table></figure>
+<h3 id="查看当前虚拟机镜像文件"><a href="#查看当前虚拟机镜像文件" class="headerlink" title="查看当前虚拟机镜像文件"></a>查看当前虚拟机镜像文件</h3><pre><code>注: 快照的版本也记录在镜像文件中看到 快照配置文件在/var/lib/libvirt/qemu/snapshot/虚拟机名称/
+</code></pre><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-img info linux.qcow2</span><br></pre></td></tr></table></figure>
+<h2 id="恢复虚拟机快照"><a href="#恢复虚拟机快照" class="headerlink" title="恢复虚拟机快照"></a>恢复虚拟机快照</h2><h3 id="恢复虚拟机快照必须关闭虚拟机"><a href="#恢复虚拟机快照必须关闭虚拟机" class="headerlink" title="恢复虚拟机快照必须关闭虚拟机"></a>恢复虚拟机快照必须关闭虚拟机</h3><h3 id="确认需要恢复的快照版本名称"><a href="#确认需要恢复的快照版本名称" class="headerlink" title="确认需要恢复的快照版本名称"></a>确认需要恢复的快照版本名称</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">virsh snapshot-list linux</span><br><span class="line">Name                 Creation Time             State</span><br><span class="line">------------------------------------------------------------</span><br><span class="line">1491237978           2017-04-04 00:46:18 +0800 shutoff</span><br><span class="line">1491238099           2017-04-04 00:48:19 +0800 shutoff</span><br></pre></td></tr></table></figure>
+<h3 id="执行恢复并确认恢复版本"><a href="#执行恢复并确认恢复版本" class="headerlink" title="执行恢复并确认恢复版本"></a>执行恢复并确认恢复版本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virsh snapshot-revert linux 1491237978</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virsh snapshot-current linux</span><br></pre></td></tr></table></figure>
+<h2 id="删除虚拟机快照"><a href="#删除虚拟机快照" class="headerlink" title="删除虚拟机快照"></a>删除虚拟机快照</h2><h3 id="查看虚拟机快照"><a href="#查看虚拟机快照" class="headerlink" title="查看虚拟机快照"></a>查看虚拟机快照</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-img info linux.qcow2</span><br></pre></td></tr></table></figure>
+<h3 id="删除快照"><a href="#删除快照" class="headerlink" title="删除快照"></a>删除快照</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virsh snapshot-delete linux 1491238099</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+      
+      
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/kvm/">kvm</a>
+            
+              <a href="/tags/convert/">convert</a>
+            
+              <a href="/tags/backup/">backup</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/KVM-Virtualization/KVM-virtual-machine-extended-disk-space.html">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">KVM virtual machine extended disk space</span>
+        <span class="prev-text nav-mobile">上一篇</span>
+      </a>
+    
+    
+      <a class="next" href="/KVM-Virtualization/KVM-virtual-machine-console-login-configuration.html">
+        <span class="next-text nav-default">KVM virtual machine console login configuration</span>
+        <span class="prev-text nav-mobile">下一篇</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:devops@tom.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="copyright-year">
+    
+    &copy; 
+    
+    2017
+    <span class="author">Anonymous</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+
+
+
+    
+  
+
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>
