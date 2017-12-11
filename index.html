@@ -213,6 +213,61 @@
     <header class="post-header">
       <h1 class="post-title">
         
+          <a class="post-link" href="/OpenStack/Ceph-cluster-deployment.html">Ceph cluster deployment</a>
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-12-10
+        </span>
+        
+          <div class="post-category">
+            
+              <a href="/categories/OpenStack/">OpenStack</a>
+            
+          </div>
+        
+        
+      </div>
+    </header>
+
+    
+    
+
+    <div class="post-content">
+      
+        
+        
+
+        
+          <h1 id="Ceph集群部署"><a href="#Ceph集群部署" class="headerlink" title="Ceph集群部署"></a>Ceph集群部署</h1><h2 id="配置源"><a href="#配置源" class="headerlink" title="配置源"></a>配置源</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sed -i <span class="string">'s/gpgcheck=1/gpgcheck=0/g'</span> /etc/yum.repos.d/*.repo </span><br><span class="line">yum clean all</span><br></pre></td></tr></table></figure>
+<h2 id="安装Ceph"><a href="#安装Ceph" class="headerlink" title="安装Ceph"></a>安装Ceph</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">yum -y install python-pip</span><br><span class="line">pip install --upgrade pip</span><br><span class="line">pip install ceph-deploy</span><br><span class="line"><span class="built_in">cd</span> ~ &amp;&amp; mkdir cluster &amp;&amp; <span class="built_in">cd</span> cluster/</span><br></pre></td></tr></table></figure>
+<h2 id="生成Monitor配置"><a href="#生成Monitor配置" class="headerlink" title="生成Monitor配置"></a>生成Monitor配置</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">ceph-deploy new --cluster-network 192.168.10.0/24 --public-network 192.168.100.0/24 controller-1 controller-2 controller-3 </span><br><span class="line"><span class="built_in">echo</span> <span class="string">'</span></span><br><span class="line"><span class="string">mon_clock_drift_allowed = 2</span></span><br><span class="line"><span class="string">osd_journal_size = 4086</span></span><br><span class="line"><span class="string">osd_pool_default_pg_num = 128</span></span><br><span class="line"><span class="string">osd_pool_default_pgp_num = 128</span></span><br><span class="line"><span class="string">osd pool default size = 2</span></span><br><span class="line"><span class="string">osd pool default min size = 1</span></span><br><span class="line"><span class="string">rbd_default_features = 1</span></span><br><span class="line"><span class="string">client_quota = true</span></span><br><span class="line"><span class="string">'</span> &gt;&gt; /root/cluster/ceph.conf</span><br></pre></td></tr></table></figure>
+<h2 id="集群安装Ceph"><a href="#集群安装Ceph" class="headerlink" title="集群安装Ceph"></a>集群安装Ceph</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ceph-deploy install controller-1 controller-2 controller-3 compute-1 compute-2</span><br></pre></td></tr></table></figure>
+<h2 id="部署Monitor"><a href="#部署Monitor" class="headerlink" title="部署Monitor"></a>部署Monitor</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ceph-deploy mon create-initial</span><br></pre></td></tr></table></figure>
+<h2 id="部署osd"><a href="#部署osd" class="headerlink" title="部署osd"></a>部署osd</h2><h3 id="列出磁盘"><a href="#列出磁盘" class="headerlink" title="列出磁盘"></a>列出磁盘</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">'- - -'</span> &gt; /sys/class/scsi_host/host0/scan </span><br><span class="line"><span class="built_in">echo</span> <span class="string">'- - -'</span> &gt; /sys/class/scsi_host/host1/scan </span><br><span class="line"><span class="built_in">echo</span> <span class="string">'- - -'</span> &gt; /sys/class/scsi_host/host2/scan</span><br><span class="line">ceph-deploy disk list controller-1 controller-2 controller-3 compute-1 compute-2</span><br></pre></td></tr></table></figure>
+<h3 id="擦除磁盘"><a href="#擦除磁盘" class="headerlink" title="擦除磁盘"></a>擦除磁盘</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ceph-deploy disk zap \</span><br><span class="line">controller-1:sdb controller-1:sdc \</span><br><span class="line">controller-2:sdb controller-2:sdc \</span><br><span class="line">controller-3:sdb controller-3:sdc \</span><br><span class="line">compute-1:sdb compute-1:sdc \</span><br><span class="line">compute-2:sdb compute-2:sdc</span><br></pre></td></tr></table></figure>
+<h3 id="添加osd"><a href="#添加osd" class="headerlink" title="添加osd"></a>添加osd</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ceph-deploy --overwrite-conf osd create \</span><br><span class="line">controller-1:sdb controller-1:sdc \</span><br><span class="line">controller-2:sdb controller-2:sdc \</span><br><span class="line">controller-3:sdb controller-3:sdc \</span><br><span class="line">compute-1:sdb compute-1:sdc \</span><br><span class="line">compute-2:sdb compute-2:sdc</span><br></pre></td></tr></table></figure>
+<h3 id="拷贝配置及密钥"><a href="#拷贝配置及密钥" class="headerlink" title="拷贝配置及密钥"></a>拷贝配置及密钥</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ceph-deploy admin controller-1 controller-2 controller-3 compute-1 compute-2</span><br><span class="line">chmod 644 /etc/ceph/ceph.client.admin.keyring</span><br></pre></td></tr></table></figure>
+<h2 id="创建mon"><a href="#创建mon" class="headerlink" title="创建mon"></a>创建mon</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ceph-deploy mon create controller-1</span><br><span class="line">ceph-deploy admin controller-1</span><br><span class="line">ceph-deploy mon create controller-2</span><br><span class="line">ceph-deploy admin controller-2</span><br><span class="line">ceph-deploy mon create controller-3</span><br><span class="line">ceph-deploy admin controller-3</span><br></pre></td></tr></table></figure>
+<h2 id="配置擦除"><a href="#配置擦除" class="headerlink" title="配置擦除"></a>配置擦除</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ceph-deploy purge controller-1 controller-2 controller-3 compute-1 compute-2</span><br><span class="line">ceph-deploy purgedata controller-1 controller-2 controller-3 compute-1 compute-2</span><br><span class="line">ceph-deploy forgetkeys</span><br></pre></td></tr></table></figure>
+        
+      
+    </div>
+
+    
+
+    
+
+  </article>
+
+    
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
           <a class="post-link" href="/KVM-Virtualization/Performance-adjustment-of-Windows-virtual-machine.html">Performance adjustment of Windows virtual machine</a>
         
       </h1>

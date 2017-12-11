@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="Ceph cluster deployment"/>
+
+
+
+
+  <meta name="keywords" content="ceph, 记忆博客" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="记忆博客">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://c-cc-ccc.cc/OpenStack/Ceph-cluster-deployment.html"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+  <link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> Ceph cluster deployment - 记忆博客 </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">记忆博客</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            首页
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            归档
+          
+        </li>
+      </a>
+    
+      <a href="/tags">
+        <li class="mobile-menu-item">
+          
+          
+            标签
+          
+        </li>
+      </a>
+    
+      <a href="/categories">
+        <li class="mobile-menu-item">
+          
+          
+            分类
+          
+        </li>
+      </a>
+    
+      <a href="/about">
+        <li class="mobile-menu-item">
+          
+          
+            关于
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">记忆博客</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              首页
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              归档
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/tags">
+            
+            
+              标签
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/categories">
+            
+            
+              分类
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/about">
+            
+            
+              关于
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          Ceph cluster deployment
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-12-10
+        </span>
+        
+          <div class="post-category">
+            
+              <a href="/categories/OpenStack/">OpenStack</a>
+            
+          </div>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Ceph集群部署"><span class="toc-text"><a href="#Ceph&#x96C6;&#x7FA4;&#x90E8;&#x7F72;" class="headerlink" title="Ceph&#x96C6;&#x7FA4;&#x90E8;&#x7F72;"></a>Ceph&#x96C6;&#x7FA4;&#x90E8;&#x7F72;</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#配置源"><span class="toc-text"><a href="#&#x914D;&#x7F6E;&#x6E90;" class="headerlink" title="&#x914D;&#x7F6E;&#x6E90;"></a>&#x914D;&#x7F6E;&#x6E90;</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安装Ceph"><span class="toc-text"><a href="#&#x5B89;&#x88C5;Ceph" class="headerlink" title="&#x5B89;&#x88C5;Ceph"></a>&#x5B89;&#x88C5;Ceph</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#生成Monitor配置"><span class="toc-text"><a href="#&#x751F;&#x6210;Monitor&#x914D;&#x7F6E;" class="headerlink" title="&#x751F;&#x6210;Monitor&#x914D;&#x7F6E;"></a>&#x751F;&#x6210;Monitor&#x914D;&#x7F6E;</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#集群安装Ceph"><span class="toc-text"><a href="#&#x96C6;&#x7FA4;&#x5B89;&#x88C5;Ceph" class="headerlink" title="&#x96C6;&#x7FA4;&#x5B89;&#x88C5;Ceph"></a>&#x96C6;&#x7FA4;&#x5B89;&#x88C5;Ceph</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#部署Monitor"><span class="toc-text"><a href="#&#x90E8;&#x7F72;Monitor" class="headerlink" title="&#x90E8;&#x7F72;Monitor"></a>&#x90E8;&#x7F72;Monitor</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#部署osd"><span class="toc-text"><a href="#&#x90E8;&#x7F72;osd" class="headerlink" title="&#x90E8;&#x7F72;osd"></a>&#x90E8;&#x7F72;osd</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#列出磁盘"><span class="toc-text"><a href="#&#x5217;&#x51FA;&#x78C1;&#x76D8;" class="headerlink" title="&#x5217;&#x51FA;&#x78C1;&#x76D8;"></a>&#x5217;&#x51FA;&#x78C1;&#x76D8;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#擦除磁盘"><span class="toc-text"><a href="#&#x64E6;&#x9664;&#x78C1;&#x76D8;" class="headerlink" title="&#x64E6;&#x9664;&#x78C1;&#x76D8;"></a>&#x64E6;&#x9664;&#x78C1;&#x76D8;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#添加osd"><span class="toc-text"><a href="#&#x6DFB;&#x52A0;osd" class="headerlink" title="&#x6DFB;&#x52A0;osd"></a>&#x6DFB;&#x52A0;osd</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#拷贝配置及密钥"><span class="toc-text"><a href="#&#x62F7;&#x8D1D;&#x914D;&#x7F6E;&#x53CA;&#x5BC6;&#x94A5;" class="headerlink" title="&#x62F7;&#x8D1D;&#x914D;&#x7F6E;&#x53CA;&#x5BC6;&#x94A5;"></a>&#x62F7;&#x8D1D;&#x914D;&#x7F6E;&#x53CA;&#x5BC6;&#x94A5;</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#创建mon"><span class="toc-text"><a href="#&#x521B;&#x5EFA;mon" class="headerlink" title="&#x521B;&#x5EFA;mon"></a>&#x521B;&#x5EFA;mon</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#配置擦除"><span class="toc-text"><a href="#&#x914D;&#x7F6E;&#x64E6;&#x9664;" class="headerlink" title="&#x914D;&#x7F6E;&#x64E6;&#x9664;"></a>&#x914D;&#x7F6E;&#x64E6;&#x9664;</span></a></li></ol></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <h1 id="Ceph集群部署"><a href="#Ceph集群部署" class="headerlink" title="Ceph集群部署"></a>Ceph集群部署</h1><h2 id="配置源"><a href="#配置源" class="headerlink" title="配置源"></a>配置源</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sed -i <span class="string">'s/gpgcheck=1/gpgcheck=0/g'</span> /etc/yum.repos.d/*.repo </span><br><span class="line">yum clean all</span><br></pre></td></tr></table></figure>
+<h2 id="安装Ceph"><a href="#安装Ceph" class="headerlink" title="安装Ceph"></a>安装Ceph</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">yum -y install python-pip</span><br><span class="line">pip install --upgrade pip</span><br><span class="line">pip install ceph-deploy</span><br><span class="line"><span class="built_in">cd</span> ~ &amp;&amp; mkdir cluster &amp;&amp; <span class="built_in">cd</span> cluster/</span><br></pre></td></tr></table></figure>
+<h2 id="生成Monitor配置"><a href="#生成Monitor配置" class="headerlink" title="生成Monitor配置"></a>生成Monitor配置</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">ceph-deploy new --cluster-network 192.168.10.0/24 --public-network 192.168.100.0/24 controller-1 controller-2 controller-3 </span><br><span class="line"><span class="built_in">echo</span> <span class="string">'</span></span><br><span class="line"><span class="string">mon_clock_drift_allowed = 2</span></span><br><span class="line"><span class="string">osd_journal_size = 4086</span></span><br><span class="line"><span class="string">osd_pool_default_pg_num = 128</span></span><br><span class="line"><span class="string">osd_pool_default_pgp_num = 128</span></span><br><span class="line"><span class="string">osd pool default size = 2</span></span><br><span class="line"><span class="string">osd pool default min size = 1</span></span><br><span class="line"><span class="string">rbd_default_features = 1</span></span><br><span class="line"><span class="string">client_quota = true</span></span><br><span class="line"><span class="string">'</span> &gt;&gt; /root/cluster/ceph.conf</span><br></pre></td></tr></table></figure>
+<h2 id="集群安装Ceph"><a href="#集群安装Ceph" class="headerlink" title="集群安装Ceph"></a>集群安装Ceph</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ceph-deploy install controller-1 controller-2 controller-3 compute-1 compute-2</span><br></pre></td></tr></table></figure>
+<h2 id="部署Monitor"><a href="#部署Monitor" class="headerlink" title="部署Monitor"></a>部署Monitor</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ceph-deploy mon create-initial</span><br></pre></td></tr></table></figure>
+<h2 id="部署osd"><a href="#部署osd" class="headerlink" title="部署osd"></a>部署osd</h2><h3 id="列出磁盘"><a href="#列出磁盘" class="headerlink" title="列出磁盘"></a>列出磁盘</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">'- - -'</span> &gt; /sys/class/scsi_host/host0/scan </span><br><span class="line"><span class="built_in">echo</span> <span class="string">'- - -'</span> &gt; /sys/class/scsi_host/host1/scan </span><br><span class="line"><span class="built_in">echo</span> <span class="string">'- - -'</span> &gt; /sys/class/scsi_host/host2/scan</span><br><span class="line">ceph-deploy disk list controller-1 controller-2 controller-3 compute-1 compute-2</span><br></pre></td></tr></table></figure>
+<h3 id="擦除磁盘"><a href="#擦除磁盘" class="headerlink" title="擦除磁盘"></a>擦除磁盘</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ceph-deploy disk zap \</span><br><span class="line">controller-1:sdb controller-1:sdc \</span><br><span class="line">controller-2:sdb controller-2:sdc \</span><br><span class="line">controller-3:sdb controller-3:sdc \</span><br><span class="line">compute-1:sdb compute-1:sdc \</span><br><span class="line">compute-2:sdb compute-2:sdc</span><br></pre></td></tr></table></figure>
+<h3 id="添加osd"><a href="#添加osd" class="headerlink" title="添加osd"></a>添加osd</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ceph-deploy --overwrite-conf osd create \</span><br><span class="line">controller-1:sdb controller-1:sdc \</span><br><span class="line">controller-2:sdb controller-2:sdc \</span><br><span class="line">controller-3:sdb controller-3:sdc \</span><br><span class="line">compute-1:sdb compute-1:sdc \</span><br><span class="line">compute-2:sdb compute-2:sdc</span><br></pre></td></tr></table></figure>
+<h3 id="拷贝配置及密钥"><a href="#拷贝配置及密钥" class="headerlink" title="拷贝配置及密钥"></a>拷贝配置及密钥</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ceph-deploy admin controller-1 controller-2 controller-3 compute-1 compute-2</span><br><span class="line">chmod 644 /etc/ceph/ceph.client.admin.keyring</span><br></pre></td></tr></table></figure>
+<h2 id="创建mon"><a href="#创建mon" class="headerlink" title="创建mon"></a>创建mon</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ceph-deploy mon create controller-1</span><br><span class="line">ceph-deploy admin controller-1</span><br><span class="line">ceph-deploy mon create controller-2</span><br><span class="line">ceph-deploy admin controller-2</span><br><span class="line">ceph-deploy mon create controller-3</span><br><span class="line">ceph-deploy admin controller-3</span><br></pre></td></tr></table></figure>
+<h2 id="配置擦除"><a href="#配置擦除" class="headerlink" title="配置擦除"></a>配置擦除</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ceph-deploy purge controller-1 controller-2 controller-3 compute-1 compute-2</span><br><span class="line">ceph-deploy purgedata controller-1 controller-2 controller-3 compute-1 compute-2</span><br><span class="line">ceph-deploy forgetkeys</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+      
+      
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/ceph/">ceph</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+    
+      <a class="next" href="/KVM-Virtualization/Performance-adjustment-of-Windows-virtual-machine.html">
+        <span class="next-text nav-default">Performance adjustment of Windows virtual machine</span>
+        <span class="prev-text nav-mobile">下一篇</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:devops@tom.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="copyright-year">
+    
+    &copy; 
+    
+    2017
+    <span class="author">Anonymous</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+
+
+
+    
+  
+
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>
