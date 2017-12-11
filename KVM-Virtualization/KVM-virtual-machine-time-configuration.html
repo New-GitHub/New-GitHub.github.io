@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="KVM virtual machine time configuration"/>
+
+
+
+
+  <meta name="keywords" content="kvm, time configuration, 记忆博客" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="记忆博客">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://c-cc-ccc.cc/KVM-Virtualization/KVM-virtual-machine-time-configuration.html"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+  <link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> KVM virtual machine time configuration - 记忆博客 </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">记忆博客</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            首页
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            归档
+          
+        </li>
+      </a>
+    
+      <a href="/tags">
+        <li class="mobile-menu-item">
+          
+          
+            标签
+          
+        </li>
+      </a>
+    
+      <a href="/categories">
+        <li class="mobile-menu-item">
+          
+          
+            分类
+          
+        </li>
+      </a>
+    
+      <a href="/about">
+        <li class="mobile-menu-item">
+          
+          
+            关于
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">记忆博客</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              首页
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              归档
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/tags">
+            
+            
+              标签
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/categories">
+            
+            
+              分类
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/about">
+            
+            
+              关于
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          KVM virtual machine time configuration
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-12-08
+        </span>
+        
+          <div class="post-category">
+            
+              <a href="/categories/KVM-Virtualization/">KVM Virtualization</a>
+            
+          </div>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#KVM虚拟机时间配置"><span class="toc-text"><a href="#KVM&#x865A;&#x62DF;&#x673A;&#x65F6;&#x95F4;&#x914D;&#x7F6E;" class="headerlink" title="KVM&#x865A;&#x62DF;&#x673A;&#x65F6;&#x95F4;&#x914D;&#x7F6E;"></a>KVM&#x865A;&#x62DF;&#x673A;&#x65F6;&#x95F4;&#x914D;&#x7F6E;</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#kvm虚拟机修改时间配置文件"><span class="toc-text"><a href="#kvm&#x865A;&#x62DF;&#x673A;&#x4FEE;&#x6539;&#x65F6;&#x95F4;&#x914D;&#x7F6E;&#x6587;&#x4EF6;" class="headerlink" title="kvm&#x865A;&#x62DF;&#x673A;&#x4FEE;&#x6539;&#x65F6;&#x95F4;&#x914D;&#x7F6E;&#x6587;&#x4EF6;"></a>kvm&#x865A;&#x62DF;&#x673A;&#x4FEE;&#x6539;&#x65F6;&#x95F4;&#x914D;&#x7F6E;&#x6587;&#x4EF6;</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#kvm虚拟机采用utc时间，需要先修改配置文件使用KVM虚拟机的时间与虚拟主机同步。"><span class="toc-text"><a href="#kvm&#x865A;&#x62DF;&#x673A;&#x91C7;&#x7528;utc&#x65F6;&#x95F4;&#xFF0C;&#x9700;&#x8981;&#x5148;&#x4FEE;&#x6539;&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#x4F7F;&#x7528;KVM&#x865A;&#x62DF;&#x673A;&#x7684;&#x65F6;&#x95F4;&#x4E0E;&#x865A;&#x62DF;&#x4E3B;&#x673A;&#x540C;&#x6B65;&#x3002;" class="headerlink" title="kvm&#x865A;&#x62DF;&#x673A;&#x91C7;&#x7528;utc&#x65F6;&#x95F4;&#xFF0C;&#x9700;&#x8981;&#x5148;&#x4FEE;&#x6539;&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#x4F7F;&#x7528;KVM&#x865A;&#x62DF;&#x673A;&#x7684;&#x65F6;&#x95F4;&#x4E0E;&#x865A;&#x62DF;&#x4E3B;&#x673A;&#x540C;&#x6B65;&#x3002;"></a>kvm&#x865A;&#x62DF;&#x673A;&#x91C7;&#x7528;utc&#x65F6;&#x95F4;&#xFF0C;&#x9700;&#x8981;&#x5148;&#x4FEE;&#x6539;&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#x4F7F;&#x7528;KVM&#x865A;&#x62DF;&#x673A;&#x7684;&#x65F6;&#x95F4;&#x4E0E;&#x865A;&#x62DF;&#x4E3B;&#x673A;&#x540C;&#x6B65;&#x3002;</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#关于kvm虚拟机时间问题解决思路"><span class="toc-text"><a href="#&#x5173;&#x4E8E;kvm&#x865A;&#x62DF;&#x673A;&#x65F6;&#x95F4;&#x95EE;&#x9898;&#x89E3;&#x51B3;&#x601D;&#x8DEF;" class="headerlink" title="&#x5173;&#x4E8E;kvm&#x865A;&#x62DF;&#x673A;&#x65F6;&#x95F4;&#x95EE;&#x9898;&#x89E3;&#x51B3;&#x601D;&#x8DEF;"></a>&#x5173;&#x4E8E;kvm&#x865A;&#x62DF;&#x673A;&#x65F6;&#x95F4;&#x95EE;&#x9898;&#x89E3;&#x51B3;&#x601D;&#x8DEF;</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#虚拟机时间慢是所有虚拟化平台的一共性问题。"><span class="toc-text"><a href="#&#x865A;&#x62DF;&#x673A;&#x65F6;&#x95F4;&#x6162;&#x662F;&#x6240;&#x6709;&#x865A;&#x62DF;&#x5316;&#x5E73;&#x53F0;&#x7684;&#x4E00;&#x5171;&#x6027;&#x95EE;&#x9898;&#x3002;" class="headerlink" title="&#x865A;&#x62DF;&#x673A;&#x65F6;&#x95F4;&#x6162;&#x662F;&#x6240;&#x6709;&#x865A;&#x62DF;&#x5316;&#x5E73;&#x53F0;&#x7684;&#x4E00;&#x5171;&#x6027;&#x95EE;&#x9898;&#x3002;"></a>&#x865A;&#x62DF;&#x673A;&#x65F6;&#x95F4;&#x6162;&#x662F;&#x6240;&#x6709;&#x865A;&#x62DF;&#x5316;&#x5E73;&#x53F0;&#x7684;&#x4E00;&#x5171;&#x6027;&#x95EE;&#x9898;&#x3002;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#解决时间的最终解决方法就是在生产环境中配置时间服务器，kvm虚拟化服务器与kvm机均都要配置时间同步的计划任务，这才是解决这一个问题最终解决方案。"><span class="toc-text"><a href="#&#x89E3;&#x51B3;&#x65F6;&#x95F4;&#x7684;&#x6700;&#x7EC8;&#x89E3;&#x51B3;&#x65B9;&#x6CD5;&#x5C31;&#x662F;&#x5728;&#x751F;&#x4EA7;&#x73AF;&#x5883;&#x4E2D;&#x914D;&#x7F6E;&#x65F6;&#x95F4;&#x670D;&#x52A1;&#x5668;&#xFF0C;kvm&#x865A;&#x62DF;&#x5316;&#x670D;&#x52A1;&#x5668;&#x4E0E;kvm&#x673A;&#x5747;&#x90FD;&#x8981;&#x914D;&#x7F6E;&#x65F6;&#x95F4;&#x540C;&#x6B65;&#x7684;&#x8BA1;&#x5212;&#x4EFB;&#x52A1;&#xFF0C;&#x8FD9;&#x624D;&#x662F;&#x89E3;&#x51B3;&#x8FD9;&#x4E00;&#x4E2A;&#x95EE;&#x9898;&#x6700;&#x7EC8;&#x89E3;&#x51B3;&#x65B9;&#x6848;&#x3002;" class="headerlink" title="&#x89E3;&#x51B3;&#x65F6;&#x95F4;&#x7684;&#x6700;&#x7EC8;&#x89E3;&#x51B3;&#x65B9;&#x6CD5;&#x5C31;&#x662F;&#x5728;&#x751F;&#x4EA7;&#x73AF;&#x5883;&#x4E2D;&#x914D;&#x7F6E;&#x65F6;&#x95F4;&#x670D;&#x52A1;&#x5668;&#xFF0C;kvm&#x865A;&#x62DF;&#x5316;&#x670D;&#x52A1;&#x5668;&#x4E0E;kvm&#x673A;&#x5747;&#x90FD;&#x8981;&#x914D;&#x7F6E;&#x65F6;&#x95F4;&#x540C;&#x6B65;&#x7684;&#x8BA1;&#x5212;&#x4EFB;&#x52A1;&#xFF0C;&#x8FD9;&#x624D;&#x662F;&#x89E3;&#x51B3;&#x8FD9;&#x4E00;&#x4E2A;&#x95EE;&#x9898;&#x6700;&#x7EC8;&#x89E3;&#x51B3;&#x65B9;&#x6848;&#x3002;"></a>&#x89E3;&#x51B3;&#x65F6;&#x95F4;&#x7684;&#x6700;&#x7EC8;&#x89E3;&#x51B3;&#x65B9;&#x6CD5;&#x5C31;&#x662F;&#x5728;&#x751F;&#x4EA7;&#x73AF;&#x5883;&#x4E2D;&#x914D;&#x7F6E;&#x65F6;&#x95F4;&#x670D;&#x52A1;&#x5668;&#xFF0C;kvm&#x865A;&#x62DF;&#x5316;&#x670D;&#x52A1;&#x5668;&#x4E0E;kvm&#x673A;&#x5747;&#x90FD;&#x8981;&#x914D;&#x7F6E;&#x65F6;&#x95F4;&#x540C;&#x6B65;&#x7684;&#x8BA1;&#x5212;&#x4EFB;&#x52A1;&#xFF0C;&#x8FD9;&#x624D;&#x662F;&#x89E3;&#x51B3;&#x8FD9;&#x4E00;&#x4E2A;&#x95EE;&#x9898;&#x6700;&#x7EC8;&#x89E3;&#x51B3;&#x65B9;&#x6848;&#x3002;</span></a></li></ol></li></ol></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <h1 id="KVM虚拟机时间配置"><a href="#KVM虚拟机时间配置" class="headerlink" title="KVM虚拟机时间配置"></a>KVM虚拟机时间配置</h1><pre><code>在虚拟化环境中，虚拟机在长时间运行过程中，时间会变慢，通常的作法是配置ntpdate定时与时间服务器进行时间同步的计划任务。KVM虚拟机默认采用utc时间，需要专门修改，以及考虑kvm时间同步问题。
+</code></pre><h2 id="kvm虚拟机修改时间配置文件"><a href="#kvm虚拟机修改时间配置文件" class="headerlink" title="kvm虚拟机修改时间配置文件"></a>kvm虚拟机修改时间配置文件</h2><h3 id="kvm虚拟机采用utc时间，需要先修改配置文件使用KVM虚拟机的时间与虚拟主机同步。"><a href="#kvm虚拟机采用utc时间，需要先修改配置文件使用KVM虚拟机的时间与虚拟主机同步。" class="headerlink" title="kvm虚拟机采用utc时间，需要先修改配置文件使用KVM虚拟机的时间与虚拟主机同步。"></a>kvm虚拟机采用utc时间，需要先修改配置文件使用KVM虚拟机的时间与虚拟主机同步。</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">virsh edit linux</span><br><span class="line">&lt;clock offset=<span class="string">'utc'</span>/&gt; 改为 &lt;clock offset=<span class="string">'localtime'</span>/&gt; 保存退出，重启虚拟机。</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<h2 id="关于kvm虚拟机时间问题解决思路"><a href="#关于kvm虚拟机时间问题解决思路" class="headerlink" title="关于kvm虚拟机时间问题解决思路"></a>关于kvm虚拟机时间问题解决思路</h2><h3 id="虚拟机时间慢是所有虚拟化平台的一共性问题。"><a href="#虚拟机时间慢是所有虚拟化平台的一共性问题。" class="headerlink" title="虚拟机时间慢是所有虚拟化平台的一共性问题。"></a>虚拟机时间慢是所有虚拟化平台的一共性问题。</h3><h3 id="解决时间的最终解决方法就是在生产环境中配置时间服务器，kvm虚拟化服务器与kvm机均都要配置时间同步的计划任务，这才是解决这一个问题最终解决方案。"><a href="#解决时间的最终解决方法就是在生产环境中配置时间服务器，kvm虚拟化服务器与kvm机均都要配置时间同步的计划任务，这才是解决这一个问题最终解决方案。" class="headerlink" title="解决时间的最终解决方法就是在生产环境中配置时间服务器，kvm虚拟化服务器与kvm机均都要配置时间同步的计划任务，这才是解决这一个问题最终解决方案。"></a>解决时间的最终解决方法就是在生产环境中配置时间服务器，kvm虚拟化服务器与kvm机均都要配置时间同步的计划任务，这才是解决这一个问题最终解决方案。</h3><pre><code>注: 如果能访问互联网，最简单了，需要kvm虚拟机与主机时间同步，但是运行一段时间会慢，一定要做时间同步配合crontab，特别是对时间敏感的环境。  
+</code></pre>
+      
+    </div>
+
+    
+      
+      
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/kvm/">kvm</a>
+            
+              <a href="/tags/time-configuration/">time configuration</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/KVM-Virtualization/Performance-adjustment-of-Windows-virtual-machine.html">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">Performance adjustment of Windows virtual machine</span>
+        <span class="prev-text nav-mobile">上一篇</span>
+      </a>
+    
+    
+      <a class="next" href="/KVM-Virtualization/The-daily-management-and-configuration-of-KVM-virtual-machine.html">
+        <span class="next-text nav-default">The daily management and configuration of KVM virtual machine</span>
+        <span class="prev-text nav-mobile">下一篇</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:devops@tom.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="copyright-year">
+    
+    &copy; 
+    
+    2017
+    <span class="author">Anonymous</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+
+
+
+    
+  
+
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>

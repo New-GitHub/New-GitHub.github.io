@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="Performance adjustment of Windows virtual machine"/>
+
+
+
+
+  <meta name="keywords" content="kvm, windows, virtio, device, 记忆博客" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="记忆博客">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://c-cc-ccc.cc/KVM-Virtualization/Performance-adjustment-of-Windows-virtual-machine.html"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+  <link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> Performance adjustment of Windows virtual machine - 记忆博客 </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">记忆博客</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            首页
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            归档
+          
+        </li>
+      </a>
+    
+      <a href="/tags">
+        <li class="mobile-menu-item">
+          
+          
+            标签
+          
+        </li>
+      </a>
+    
+      <a href="/categories">
+        <li class="mobile-menu-item">
+          
+          
+            分类
+          
+        </li>
+      </a>
+    
+      <a href="/about">
+        <li class="mobile-menu-item">
+          
+          
+            关于
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">记忆博客</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              首页
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              归档
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/tags">
+            
+            
+              标签
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/categories">
+            
+            
+              分类
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/about">
+            
+            
+              关于
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          Performance adjustment of Windows virtual machine
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-12-09
+        </span>
+        
+          <div class="post-category">
+            
+              <a href="/categories/KVM-Virtualization/">KVM Virtualization</a>
+            
+          </div>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Windows虚拟机性能调整"><span class="toc-text"><a href="#Windows&#x865A;&#x62DF;&#x673A;&#x6027;&#x80FD;&#x8C03;&#x6574;" class="headerlink" title="Windows&#x865A;&#x62DF;&#x673A;&#x6027;&#x80FD;&#x8C03;&#x6574;"></a>Windows&#x865A;&#x62DF;&#x673A;&#x6027;&#x80FD;&#x8C03;&#x6574;</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#加载驱动思路"><span class="toc-text"><a href="#&#x52A0;&#x8F7D;&#x9A71;&#x52A8;&#x601D;&#x8DEF;" class="headerlink" title="&#x52A0;&#x8F7D;&#x9A71;&#x52A8;&#x601D;&#x8DEF;"></a>&#x52A0;&#x8F7D;&#x9A71;&#x52A8;&#x601D;&#x8DEF;</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#使用默认方式来安装Windows系统，安装系统完成后，再安装virtio磁盘驱动，最后修改kvm启动参数，设置磁盘为virtio。"><span class="toc-text"><a href="#&#x4F7F;&#x7528;&#x9ED8;&#x8BA4;&#x65B9;&#x5F0F;&#x6765;&#x5B89;&#x88C5;Windows&#x7CFB;&#x7EDF;&#xFF0C;&#x5B89;&#x88C5;&#x7CFB;&#x7EDF;&#x5B8C;&#x6210;&#x540E;&#xFF0C;&#x518D;&#x5B89;&#x88C5;virtio&#x78C1;&#x76D8;&#x9A71;&#x52A8;&#xFF0C;&#x6700;&#x540E;&#x4FEE;&#x6539;kvm&#x542F;&#x52A8;&#x53C2;&#x6570;&#xFF0C;&#x8BBE;&#x7F6E;&#x78C1;&#x76D8;&#x4E3A;virtio&#x3002;" class="headerlink" title="&#x4F7F;&#x7528;&#x9ED8;&#x8BA4;&#x65B9;&#x5F0F;&#x6765;&#x5B89;&#x88C5;Windows&#x7CFB;&#x7EDF;&#xFF0C;&#x5B89;&#x88C5;&#x7CFB;&#x7EDF;&#x5B8C;&#x6210;&#x540E;&#xFF0C;&#x518D;&#x5B89;&#x88C5;virtio&#x78C1;&#x76D8;&#x9A71;&#x52A8;&#xFF0C;&#x6700;&#x540E;&#x4FEE;&#x6539;kvm&#x542F;&#x52A8;&#x53C2;&#x6570;&#xFF0C;&#x8BBE;&#x7F6E;&#x78C1;&#x76D8;&#x4E3A;virtio&#x3002;"></a>&#x4F7F;&#x7528;&#x9ED8;&#x8BA4;&#x65B9;&#x5F0F;&#x6765;&#x5B89;&#x88C5;Windows&#x7CFB;&#x7EDF;&#xFF0C;&#x5B89;&#x88C5;&#x7CFB;&#x7EDF;&#x5B8C;&#x6210;&#x540E;&#xFF0C;&#x518D;&#x5B89;&#x88C5;virtio&#x78C1;&#x76D8;&#x9A71;&#x52A8;&#xFF0C;&#x6700;&#x540E;&#x4FEE;&#x6539;kvm&#x542F;&#x52A8;&#x53C2;&#x6570;&#xFF0C;&#x8BBE;&#x7F6E;&#x78C1;&#x76D8;&#x4E3A;virtio&#x3002;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#在开始安装时直接按F6加载virtio驱动。"><span class="toc-text"><a href="#&#x5728;&#x5F00;&#x59CB;&#x5B89;&#x88C5;&#x65F6;&#x76F4;&#x63A5;&#x6309;F6&#x52A0;&#x8F7D;virtio&#x9A71;&#x52A8;&#x3002;" class="headerlink" title="&#x5728;&#x5F00;&#x59CB;&#x5B89;&#x88C5;&#x65F6;&#x76F4;&#x63A5;&#x6309;F6&#x52A0;&#x8F7D;virtio&#x9A71;&#x52A8;&#x3002;"></a>&#x5728;&#x5F00;&#x59CB;&#x5B89;&#x88C5;&#x65F6;&#x76F4;&#x63A5;&#x6309;F6&#x52A0;&#x8F7D;virtio&#x9A71;&#x52A8;&#x3002;</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#替换驱动"><span class="toc-text"><a href="#&#x66FF;&#x6362;&#x9A71;&#x52A8;" class="headerlink" title="&#x66FF;&#x6362;&#x9A71;&#x52A8;"></a>&#x66FF;&#x6362;&#x9A71;&#x52A8;</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#通过正常的图形界面方式进行安装windows虚拟机-这时驱动都是采用的默认的。"><span class="toc-text"><a href="#&#x901A;&#x8FC7;&#x6B63;&#x5E38;&#x7684;&#x56FE;&#x5F62;&#x754C;&#x9762;&#x65B9;&#x5F0F;&#x8FDB;&#x884C;&#x5B89;&#x88C5;windows&#x865A;&#x62DF;&#x673A;-&#x8FD9;&#x65F6;&#x9A71;&#x52A8;&#x90FD;&#x662F;&#x91C7;&#x7528;&#x7684;&#x9ED8;&#x8BA4;&#x7684;&#x3002;" class="headerlink" title="&#x901A;&#x8FC7;&#x6B63;&#x5E38;&#x7684;&#x56FE;&#x5F62;&#x754C;&#x9762;&#x65B9;&#x5F0F;&#x8FDB;&#x884C;&#x5B89;&#x88C5;windows&#x865A;&#x62DF;&#x673A;,&#x8FD9;&#x65F6;&#x9A71;&#x52A8;&#x90FD;&#x662F;&#x91C7;&#x7528;&#x7684;&#x9ED8;&#x8BA4;&#x7684;&#x3002;"></a>&#x901A;&#x8FC7;&#x6B63;&#x5E38;&#x7684;&#x56FE;&#x5F62;&#x754C;&#x9762;&#x65B9;&#x5F0F;&#x8FDB;&#x884C;&#x5B89;&#x88C5;windows&#x865A;&#x62DF;&#x673A;,&#x8FD9;&#x65F6;&#x9A71;&#x52A8;&#x90FD;&#x662F;&#x91C7;&#x7528;&#x7684;&#x9ED8;&#x8BA4;&#x7684;&#x3002;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#在控制台上添加一块virtio磁盘，一块virtio网卡，光驱挂载virtioISO驱动光盘。"><span class="toc-text"><a href="#&#x5728;&#x63A7;&#x5236;&#x53F0;&#x4E0A;&#x6DFB;&#x52A0;&#x4E00;&#x5757;virtio&#x78C1;&#x76D8;&#xFF0C;&#x4E00;&#x5757;virtio&#x7F51;&#x5361;&#xFF0C;&#x5149;&#x9A71;&#x6302;&#x8F7D;virtioISO&#x9A71;&#x52A8;&#x5149;&#x76D8;&#x3002;" class="headerlink" title="&#x5728;&#x63A7;&#x5236;&#x53F0;&#x4E0A;&#x6DFB;&#x52A0;&#x4E00;&#x5757;virtio&#x78C1;&#x76D8;&#xFF0C;&#x4E00;&#x5757;virtio&#x7F51;&#x5361;&#xFF0C;&#x5149;&#x9A71;&#x6302;&#x8F7D;virtioISO&#x9A71;&#x52A8;&#x5149;&#x76D8;&#x3002;"></a>&#x5728;&#x63A7;&#x5236;&#x53F0;&#x4E0A;&#x6DFB;&#x52A0;&#x4E00;&#x5757;virtio&#x78C1;&#x76D8;&#xFF0C;&#x4E00;&#x5757;virtio&#x7F51;&#x5361;&#xFF0C;&#x5149;&#x9A71;&#x6302;&#x8F7D;virtioISO&#x9A71;&#x52A8;&#x5149;&#x76D8;&#x3002;</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#解决KVM虚拟机鼠标同步问题"><span class="toc-text"><a href="#&#x89E3;&#x51B3;KVM&#x865A;&#x62DF;&#x673A;&#x9F20;&#x6807;&#x540C;&#x6B65;&#x95EE;&#x9898;" class="headerlink" title="&#x89E3;&#x51B3;KVM&#x865A;&#x62DF;&#x673A;&#x9F20;&#x6807;&#x540C;&#x6B65;&#x95EE;&#x9898;"></a>&#x89E3;&#x51B3;KVM&#x865A;&#x62DF;&#x673A;&#x9F20;&#x6807;&#x540C;&#x6B65;&#x95EE;&#x9898;</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#创建磁盘"><span class="toc-text"><a href="#&#x521B;&#x5EFA;&#x78C1;&#x76D8;" class="headerlink" title="&#x521B;&#x5EFA;&#x78C1;&#x76D8;"></a>&#x521B;&#x5EFA;&#x78C1;&#x76D8;</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#创建虚拟机"><span class="toc-text"><a href="#&#x521B;&#x5EFA;&#x865A;&#x62DF;&#x673A;" class="headerlink" title="&#x521B;&#x5EFA;&#x865A;&#x62DF;&#x673A;"></a>&#x521B;&#x5EFA;&#x865A;&#x62DF;&#x673A;</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#VNC客户端来虚拟机进行安装OS"><span class="toc-text"><a href="#VNC&#x5BA2;&#x6237;&#x7AEF;&#x6765;&#x865A;&#x62DF;&#x673A;&#x8FDB;&#x884C;&#x5B89;&#x88C5;OS" class="headerlink" title="VNC&#x5BA2;&#x6237;&#x7AEF;&#x6765;&#x865A;&#x62DF;&#x673A;&#x8FDB;&#x884C;&#x5B89;&#x88C5;OS"></a>VNC&#x5BA2;&#x6237;&#x7AEF;&#x6765;&#x865A;&#x62DF;&#x673A;&#x8FDB;&#x884C;&#x5B89;&#x88C5;OS</span></a></li></ol></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <h1 id="Windows虚拟机性能调整"><a href="#Windows虚拟机性能调整" class="headerlink" title="Windows虚拟机性能调整"></a>Windows虚拟机性能调整</h1><pre><code>Drive: virtio-win-0.1.126.iso
+OS:    cn_windows_server_2008_r2_standard_enterprise_datacenter_web_x64_dvd_x15-50360.iso
+
+在通过KVM安装WindowsXP/2003/7/2008操作系统后,由于默认的磁盘驱动(IDE)性能与网卡驱动(RTL8139100M)的性能都极其低下,需要调整，通过加载Redhatvirtio驱动来提高kvmwindows虚拟机磁盘与网卡性能。更换后的驱动为SCSI磁盘驱动，与virtio网卡驱动(1000M)。
+
+提升性能方式：
+1.采用LVM逻辑卷上安装虚拟机，采用更换磁盘驱动为SCSI来提升性能。
+2.修改默认网卡类型与驱动。新可以在安装windows的时候加载驱动，也可以安装后加载驱动，本文就是采用系统安装之后再加载驱动的方式。
+</code></pre><a id="more"></a>
+<h2 id="加载驱动思路"><a href="#加载驱动思路" class="headerlink" title="加载驱动思路"></a>加载驱动思路</h2><h3 id="使用默认方式来安装Windows系统，安装系统完成后，再安装virtio磁盘驱动，最后修改kvm启动参数，设置磁盘为virtio。"><a href="#使用默认方式来安装Windows系统，安装系统完成后，再安装virtio磁盘驱动，最后修改kvm启动参数，设置磁盘为virtio。" class="headerlink" title="使用默认方式来安装Windows系统，安装系统完成后，再安装virtio磁盘驱动，最后修改kvm启动参数，设置磁盘为virtio。"></a>使用默认方式来安装Windows系统，安装系统完成后，再安装virtio磁盘驱动，最后修改kvm启动参数，设置磁盘为virtio。</h3><h3 id="在开始安装时直接按F6加载virtio驱动。"><a href="#在开始安装时直接按F6加载virtio驱动。" class="headerlink" title="在开始安装时直接按F6加载virtio驱动。"></a>在开始安装时直接按F6加载virtio驱动。</h3><pre><code>注: 所以这里采用第一种方式安装virtio驱动。直接将配置文件修改，在没有加载virtio驱动的情况下，会造成系统无法启动。
+</code></pre><h2 id="替换驱动"><a href="#替换驱动" class="headerlink" title="替换驱动"></a>替换驱动</h2><h3 id="通过正常的图形界面方式进行安装windows虚拟机-这时驱动都是采用的默认的。"><a href="#通过正常的图形界面方式进行安装windows虚拟机-这时驱动都是采用的默认的。" class="headerlink" title="通过正常的图形界面方式进行安装windows虚拟机,这时驱动都是采用的默认的。"></a>通过正常的图形界面方式进行安装windows虚拟机,这时驱动都是采用的默认的。</h3><h3 id="在控制台上添加一块virtio磁盘，一块virtio网卡，光驱挂载virtioISO驱动光盘。"><a href="#在控制台上添加一块virtio磁盘，一块virtio网卡，光驱挂载virtioISO驱动光盘。" class="headerlink" title="在控制台上添加一块virtio磁盘，一块virtio网卡，光驱挂载virtioISO驱动光盘。"></a>在控制台上添加一块virtio磁盘，一块virtio网卡，光驱挂载virtioISO驱动光盘。</h3><h2 id="解决KVM虚拟机鼠标同步问题"><a href="#解决KVM虚拟机鼠标同步问题" class="headerlink" title="解决KVM虚拟机鼠标同步问题"></a>解决KVM虚拟机鼠标同步问题</h2><pre><code>注: kvm虚拟化windows操作系统鼠标有点不灵活等问题，在这里通过以下方式解决。在虚拟机的&lt;devices&gt;配置中增加：
+</code></pre><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">virsh edit win2003test02</span><br><span class="line">&lt;input <span class="built_in">type</span>=’tablet’ bus=’usb’/&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="创建磁盘"><a href="#创建磁盘" class="headerlink" title="创建磁盘"></a>创建磁盘</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-img create -f qcow2 /usr/<span class="built_in">local</span>/src/test02.img 15G</span><br></pre></td></tr></table></figure>
+<h2 id="创建虚拟机"><a href="#创建虚拟机" class="headerlink" title="创建虚拟机"></a>创建虚拟机</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virt-install --name=win2008r2 --ram 2048 --vcpus=2 --os-type=windows --accelerate -c /usr/<span class="built_in">local</span>/src/cn_windows_server_2008_r2_standard_enterprise_datacenter_web_x64_dvd_x15-50360.iso --disk path=/usr/<span class="built_in">local</span>/src/virtio-win-0.1.126.iso,device=cdrom --disk path=/usr/<span class="built_in">local</span>/src/test02.img,format=qcow2,bus=virtio --network bridge=br0,model=virtio --vnc --vncport=5910 --vnclisten=0.0.0.0 --force --autostart</span><br></pre></td></tr></table></figure>
+<h2 id="VNC客户端来虚拟机进行安装OS"><a href="#VNC客户端来虚拟机进行安装OS" class="headerlink" title="VNC客户端来虚拟机进行安装OS"></a>VNC客户端来虚拟机进行安装OS</h2><pre><code>注: 安装过程中识别不到磁盘，可以加载驱动后继续安装。
+</code></pre>
+      
+    </div>
+
+    
+      
+      
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/kvm/">kvm</a>
+            
+              <a href="/tags/windows/">windows</a>
+            
+              <a href="/tags/virtio/">virtio</a>
+            
+              <a href="/tags/device/">device</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+    
+      <a class="next" href="/KVM-Virtualization/KVM-virtual-machine-time-configuration.html">
+        <span class="next-text nav-default">KVM virtual machine time configuration</span>
+        <span class="prev-text nav-mobile">下一篇</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:devops@tom.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="copyright-year">
+    
+    &copy; 
+    
+    2017
+    <span class="author">Anonymous</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+
+
+
+    
+  
+
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>

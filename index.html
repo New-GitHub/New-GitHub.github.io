@@ -213,6 +213,115 @@
     <header class="post-header">
       <h1 class="post-title">
         
+          <a class="post-link" href="/KVM-Virtualization/Performance-adjustment-of-Windows-virtual-machine.html">Performance adjustment of Windows virtual machine</a>
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-12-09
+        </span>
+        
+          <div class="post-category">
+            
+              <a href="/categories/KVM-Virtualization/">KVM Virtualization</a>
+            
+          </div>
+        
+        
+      </div>
+    </header>
+
+    
+    
+
+    <div class="post-content">
+      
+        
+        
+          
+        
+
+        
+          <h1 id="Windows虚拟机性能调整"><a href="#Windows虚拟机性能调整" class="headerlink" title="Windows虚拟机性能调整"></a>Windows虚拟机性能调整</h1><pre><code>Drive: virtio-win-0.1.126.iso
+OS:    cn_windows_server_2008_r2_standard_enterprise_datacenter_web_x64_dvd_x15-50360.iso
+
+在通过KVM安装WindowsXP/2003/7/2008操作系统后,由于默认的磁盘驱动(IDE)性能与网卡驱动(RTL8139100M)的性能都极其低下,需要调整，通过加载Redhatvirtio驱动来提高kvmwindows虚拟机磁盘与网卡性能。更换后的驱动为SCSI磁盘驱动，与virtio网卡驱动(1000M)。
+
+提升性能方式：
+1.采用LVM逻辑卷上安装虚拟机，采用更换磁盘驱动为SCSI来提升性能。
+2.修改默认网卡类型与驱动。新可以在安装windows的时候加载驱动，也可以安装后加载驱动，本文就是采用系统安装之后再加载驱动的方式。
+</code></pre>
+          <div class="read-more">
+            <a href="/KVM-Virtualization/Performance-adjustment-of-Windows-virtual-machine.html" class="read-more-link">阅读更多</a>
+          </div>
+        
+      
+    </div>
+
+    
+
+    
+
+  </article>
+
+    
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          <a class="post-link" href="/KVM-Virtualization/KVM-virtual-machine-time-configuration.html">KVM virtual machine time configuration</a>
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-12-08
+        </span>
+        
+          <div class="post-category">
+            
+              <a href="/categories/KVM-Virtualization/">KVM Virtualization</a>
+            
+          </div>
+        
+        
+      </div>
+    </header>
+
+    
+    
+
+    <div class="post-content">
+      
+        
+        
+          
+        
+
+        
+          <h1 id="KVM虚拟机时间配置"><a href="#KVM虚拟机时间配置" class="headerlink" title="KVM虚拟机时间配置"></a>KVM虚拟机时间配置</h1><pre><code>在虚拟化环境中，虚拟机在长时间运行过程中，时间会变慢，通常的作法是配置ntpdate定时与时间服务器进行时间同步的计划任务。KVM虚拟机默认采用utc时间，需要专门修改，以及考虑kvm时间同步问题。
+</code></pre><h2 id="kvm虚拟机修改时间配置文件"><a href="#kvm虚拟机修改时间配置文件" class="headerlink" title="kvm虚拟机修改时间配置文件"></a>kvm虚拟机修改时间配置文件</h2><h3 id="kvm虚拟机采用utc时间，需要先修改配置文件使用KVM虚拟机的时间与虚拟主机同步。"><a href="#kvm虚拟机采用utc时间，需要先修改配置文件使用KVM虚拟机的时间与虚拟主机同步。" class="headerlink" title="kvm虚拟机采用utc时间，需要先修改配置文件使用KVM虚拟机的时间与虚拟主机同步。"></a>kvm虚拟机采用utc时间，需要先修改配置文件使用KVM虚拟机的时间与虚拟主机同步。</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">virsh edit linux</span><br><span class="line">&lt;clock offset=<span class="string">'utc'</span>/&gt; 改为 &lt;clock offset=<span class="string">'localtime'</span>/&gt; 保存退出，重启虚拟机。</span><br></pre></td></tr></table></figure>
+          <div class="read-more">
+            <a href="/KVM-Virtualization/KVM-virtual-machine-time-configuration.html" class="read-more-link">阅读更多</a>
+          </div>
+        
+      
+    </div>
+
+    
+
+    
+
+  </article>
+
+    
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
           <a class="post-link" href="/KVM-Virtualization/The-daily-management-and-configuration-of-KVM-virtual-machine.html">The daily management and configuration of KVM virtual machine</a>
         
       </h1>
