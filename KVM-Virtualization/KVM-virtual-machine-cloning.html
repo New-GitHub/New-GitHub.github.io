@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="KVM virtual machine cloning"/>
+
+
+
+
+  <meta name="keywords" content="kvm, clone, 记忆博客" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="记忆博客">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://c-cc-ccc.cc/KVM-Virtualization/KVM-virtual-machine-cloning.html"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+  <link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> KVM virtual machine cloning - 记忆博客 </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">记忆博客</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            首页
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            归档
+          
+        </li>
+      </a>
+    
+      <a href="/tags">
+        <li class="mobile-menu-item">
+          
+          
+            标签
+          
+        </li>
+      </a>
+    
+      <a href="/categories">
+        <li class="mobile-menu-item">
+          
+          
+            分类
+          
+        </li>
+      </a>
+    
+      <a href="/about">
+        <li class="mobile-menu-item">
+          
+          
+            关于
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">记忆博客</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              首页
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              归档
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/tags">
+            
+            
+              标签
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/categories">
+            
+            
+              分类
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/about">
+            
+            
+              关于
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          KVM virtual machine cloning
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-12-03
+        </span>
+        
+          <div class="post-category">
+            
+              <a href="/categories/KVM-Virtualization/">KVM Virtualization</a>
+            
+          </div>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#KVM虚拟机克隆"><span class="toc-text"><a href="#KVM&#x865A;&#x62DF;&#x673A;&#x514B;&#x9686;" class="headerlink" title="KVM&#x865A;&#x62DF;&#x673A;&#x514B;&#x9686;"></a>KVM&#x865A;&#x62DF;&#x673A;&#x514B;&#x9686;</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#本机虚拟机直接克隆"><span class="toc-text"><a href="#&#x672C;&#x673A;&#x865A;&#x62DF;&#x673A;&#x76F4;&#x63A5;&#x514B;&#x9686;" class="headerlink" title="&#x672C;&#x673A;&#x865A;&#x62DF;&#x673A;&#x76F4;&#x63A5;&#x514B;&#x9686;"></a>&#x672C;&#x673A;&#x865A;&#x62DF;&#x673A;&#x76F4;&#x63A5;&#x514B;&#x9686;</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#开始克隆"><span class="toc-text"><a href="#&#x5F00;&#x59CB;&#x514B;&#x9686;" class="headerlink" title="&#x5F00;&#x59CB;&#x514B;&#x9686;"></a>&#x5F00;&#x59CB;&#x514B;&#x9686;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#启动虚拟机并配置主机名IP地址等"><span class="toc-text"><a href="#&#x542F;&#x52A8;&#x865A;&#x62DF;&#x673A;&#x5E76;&#x914D;&#x7F6E;&#x4E3B;&#x673A;&#x540D;IP&#x5730;&#x5740;&#x7B49;" class="headerlink" title="&#x542F;&#x52A8;&#x865A;&#x62DF;&#x673A;&#x5E76;&#x914D;&#x7F6E;&#x4E3B;&#x673A;&#x540D;IP&#x5730;&#x5740;&#x7B49;"></a>&#x542F;&#x52A8;&#x865A;&#x62DF;&#x673A;&#x5E76;&#x914D;&#x7F6E;&#x4E3B;&#x673A;&#x540D;IP&#x5730;&#x5740;&#x7B49;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#重启"><span class="toc-text"><a href="#&#x91CD;&#x542F;" class="headerlink" title="&#x91CD;&#x542F;"></a>&#x91CD;&#x542F;</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#复制配置文件与磁盘文件克隆"><span class="toc-text"><a href="#&#x590D;&#x5236;&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#x4E0E;&#x78C1;&#x76D8;&#x6587;&#x4EF6;&#x514B;&#x9686;" class="headerlink" title="&#x590D;&#x5236;&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#x4E0E;&#x78C1;&#x76D8;&#x6587;&#x4EF6;&#x514B;&#x9686;"></a>&#x590D;&#x5236;&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#x4E0E;&#x78C1;&#x76D8;&#x6587;&#x4EF6;&#x514B;&#x9686;</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#导入kvm虚拟机配置文件"><span class="toc-text"><a href="#&#x5BFC;&#x5165;kvm&#x865A;&#x62DF;&#x673A;&#x914D;&#x7F6E;&#x6587;&#x4EF6;" class="headerlink" title="&#x5BFC;&#x5165;kvm&#x865A;&#x62DF;&#x673A;&#x914D;&#x7F6E;&#x6587;&#x4EF6;"></a>&#x5BFC;&#x5165;kvm&#x865A;&#x62DF;&#x673A;&#x914D;&#x7F6E;&#x6587;&#x4EF6;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#复制kvm虚拟机磁盘文件"><span class="toc-text"><a href="#&#x590D;&#x5236;kvm&#x865A;&#x62DF;&#x673A;&#x78C1;&#x76D8;&#x6587;&#x4EF6;" class="headerlink" title="&#x590D;&#x5236;kvm&#x865A;&#x62DF;&#x673A;&#x78C1;&#x76D8;&#x6587;&#x4EF6;"></a>&#x590D;&#x5236;kvm&#x865A;&#x62DF;&#x673A;&#x78C1;&#x76D8;&#x6587;&#x4EF6;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#直接编辑修改配置文件"><span class="toc-text"><a href="#&#x76F4;&#x63A5;&#x7F16;&#x8F91;&#x4FEE;&#x6539;&#x914D;&#x7F6E;&#x6587;&#x4EF6;" class="headerlink" title="&#x76F4;&#x63A5;&#x7F16;&#x8F91;&#x4FEE;&#x6539;&#x914D;&#x7F6E;&#x6587;&#x4EF6;"></a>&#x76F4;&#x63A5;&#x7F16;&#x8F91;&#x4FEE;&#x6539;&#x914D;&#x7F6E;&#x6587;&#x4EF6;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#定义新虚拟机配置文件"><span class="toc-text"><a href="#&#x5B9A;&#x4E49;&#x65B0;&#x865A;&#x62DF;&#x673A;&#x914D;&#x7F6E;&#x6587;&#x4EF6;" class="headerlink" title="&#x5B9A;&#x4E49;&#x65B0;&#x865A;&#x62DF;&#x673A;&#x914D;&#x7F6E;&#x6587;&#x4EF6;"></a>&#x5B9A;&#x4E49;&#x65B0;&#x865A;&#x62DF;&#x673A;&#x914D;&#x7F6E;&#x6587;&#x4EF6;</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#启动虚拟机"><span class="toc-text"><a href="#&#x542F;&#x52A8;&#x865A;&#x62DF;&#x673A;" class="headerlink" title="&#x542F;&#x52A8;&#x865A;&#x62DF;&#x673A;"></a>&#x542F;&#x52A8;&#x865A;&#x62DF;&#x673A;</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#启动虚拟机并配置主机名IP地址等-1"><span class="toc-text"><a href="#&#x542F;&#x52A8;&#x865A;&#x62DF;&#x673A;&#x5E76;&#x914D;&#x7F6E;&#x4E3B;&#x673A;&#x540D;IP&#x5730;&#x5740;&#x7B49;-1" class="headerlink" title="&#x542F;&#x52A8;&#x865A;&#x62DF;&#x673A;&#x5E76;&#x914D;&#x7F6E;&#x4E3B;&#x673A;&#x540D;IP&#x5730;&#x5740;&#x7B49;"></a>&#x542F;&#x52A8;&#x865A;&#x62DF;&#x673A;&#x5E76;&#x914D;&#x7F6E;&#x4E3B;&#x673A;&#x540D;IP&#x5730;&#x5740;&#x7B49;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#重启-1"><span class="toc-text"><a href="#&#x91CD;&#x542F;-1" class="headerlink" title="&#x91CD;&#x542F;"></a>&#x91CD;&#x542F;</span></a></li></ol></li></ol></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <h1 id="KVM虚拟机克隆"><a href="#KVM虚拟机克隆" class="headerlink" title="KVM虚拟机克隆"></a>KVM虚拟机克隆</h1><pre><code>kvm虚拟机的克隆分为两种情况,KVM主机本机虚拟机直接克隆。通过复制配置文件与磁盘文件的虚拟机复制克隆(适用于异机的静态迁移)。
+</code></pre><h2 id="本机虚拟机直接克隆"><a href="#本机虚拟机直接克隆" class="headerlink" title="本机虚拟机直接克隆"></a>本机虚拟机直接克隆</h2><h3 id="开始克隆"><a href="#开始克隆" class="headerlink" title="开始克隆"></a>开始克隆</h3><pre><code>注: 以rhel6为源，克隆新的一台linux且定义新的磁盘文件为linux.img。
+</code></pre><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virt-clone -o rhel6 -n linux -f /usr/<span class="built_in">local</span>/src/linux.img</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<h3 id="启动虚拟机并配置主机名IP地址等"><a href="#启动虚拟机并配置主机名IP地址等" class="headerlink" title="启动虚拟机并配置主机名IP地址等"></a>启动虚拟机并配置主机名IP地址等</h3><pre><code>注: 切记删除 rm -rf /etc/udev/rules.d/70-persistent-net.rules 
+</code></pre><h3 id="重启"><a href="#重启" class="headerlink" title="重启"></a>重启</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reboot</span><br></pre></td></tr></table></figure>
+<h2 id="复制配置文件与磁盘文件克隆"><a href="#复制配置文件与磁盘文件克隆" class="headerlink" title="复制配置文件与磁盘文件克隆"></a>复制配置文件与磁盘文件克隆</h2><h3 id="导入kvm虚拟机配置文件"><a href="#导入kvm虚拟机配置文件" class="headerlink" title="导入kvm虚拟机配置文件"></a>导入kvm虚拟机配置文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virsh shutdown linux</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virsh dumpxml linux &gt; /etc/libvirt/qemu/linux_1.xml</span><br></pre></td></tr></table></figure>
+<h3 id="复制kvm虚拟机磁盘文件"><a href="#复制kvm虚拟机磁盘文件" class="headerlink" title="复制kvm虚拟机磁盘文件"></a>复制kvm虚拟机磁盘文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp /usr/<span class="built_in">local</span>/src/linux.img /usr/<span class="built_in">local</span>/src/linux_1.img</span><br></pre></td></tr></table></figure>
+<h3 id="直接编辑修改配置文件"><a href="#直接编辑修改配置文件" class="headerlink" title="直接编辑修改配置文件"></a>直接编辑修改配置文件</h3><pre><code>注: 修改name,uuid,disk位置,vnc端口,MAC 可以使用 uuidgen linux_1.img查看UUID以便于修改
+</code></pre><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/libvirt/qemu/linux_1.xml</span><br></pre></td></tr></table></figure>
+<h3 id="定义新虚拟机配置文件"><a href="#定义新虚拟机配置文件" class="headerlink" title="定义新虚拟机配置文件"></a>定义新虚拟机配置文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virsh define /etc/libvirt/qemu/linux_1.xml</span><br></pre></td></tr></table></figure>
+<h2 id="启动虚拟机"><a href="#启动虚拟机" class="headerlink" title="启动虚拟机"></a>启动虚拟机</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virsh start linux_1</span><br></pre></td></tr></table></figure>
+<h3 id="启动虚拟机并配置主机名IP地址等-1"><a href="#启动虚拟机并配置主机名IP地址等-1" class="headerlink" title="启动虚拟机并配置主机名IP地址等"></a>启动虚拟机并配置主机名IP地址等</h3><pre><code>注: 切记删除 rm -rf /etc/udev/rules.d/70-persistent-net.rules 
+</code></pre><h3 id="重启-1"><a href="#重启-1" class="headerlink" title="重启"></a>重启</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reboot</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+      
+      
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/kvm/">kvm</a>
+            
+              <a href="/tags/clone/">clone</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/KVM-Virtualization/KVM-virtual-machine-console-login-configuration.html">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">KVM virtual machine console login configuration</span>
+        <span class="prev-text nav-mobile">上一篇</span>
+      </a>
+    
+    
+      <a class="next" href="/KVM-Virtualization/KVM-virtual-machine-installation.html">
+        <span class="next-text nav-default">KVM virtual machine installation</span>
+        <span class="prev-text nav-mobile">下一篇</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:devops@tom.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="copyright-year">
+    
+    &copy; 
+    
+    2017
+    <span class="author">Anonymous</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+
+
+
+    
+  
+
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>

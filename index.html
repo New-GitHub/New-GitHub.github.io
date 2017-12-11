@@ -213,6 +213,263 @@
     <header class="post-header">
       <h1 class="post-title">
         
+          <a class="post-link" href="/KVM-Virtualization/KVM-virtual-machine-extended-disk-space.html">KVM virtual machine extended disk space</a>
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-12-06
+        </span>
+        
+          <div class="post-category">
+            
+              <a href="/categories/KVM-Virtualization/">KVM Virtualization</a>
+            
+          </div>
+        
+        
+      </div>
+    </header>
+
+    
+    
+
+    <div class="post-content">
+      
+        
+        
+          
+        
+
+        
+          <h1 id="KVM虚拟机扩展磁盘空间"><a href="#KVM虚拟机扩展磁盘空间" class="headerlink" title="KVM虚拟机扩展磁盘空间"></a>KVM虚拟机扩展磁盘空间</h1><pre><code>kvm虚拟机磁盘空间扩展与xen虚拟机磁盘空间扩展思路一致。原因在于xen/kvm默认的虚拟机磁盘格式为raw,所以方式可以通用。
+</code></pre><h2 id="raw磁盘格式扩展思路如下"><a href="#raw磁盘格式扩展思路如下" class="headerlink" title="raw磁盘格式扩展思路如下"></a>raw磁盘格式扩展思路如下</h2><pre><code>新添加一块raw格式的磁盘加入到KVM虚拟机,然后通过虚拟机系统lvm逻辑卷管理方式进行管理，扩展磁盘空间。
+直接通过dd命令扩展现有虚拟机磁盘大小,扩展之后,原磁盘大小增大,进入虚拟机系统后,直接通过fdisk分区新添加的空间,然后将该分区并入lvm逻辑卷中,扩大磁盘空间。
+</code></pre><h2 id="qcow2磁盘格式扩展思路如下"><a href="#qcow2磁盘格式扩展思路如下" class="headerlink" title="qcow2磁盘格式扩展思路如下"></a>qcow2磁盘格式扩展思路如下</h2><pre><code>注: 当虚拟机磁盘格式换成qcow2后，确实有很多需要注意的地方，qcow2格式支持动态扩展与快照功能，虽然性比raw稍差,但确实很实用。
+可以采用raw磁盘格式磁盘的扩展方式一致的方式进行。
+</code></pre>
+          <div class="read-more">
+            <a href="/KVM-Virtualization/KVM-virtual-machine-extended-disk-space.html" class="read-more-link">阅读更多</a>
+          </div>
+        
+      
+    </div>
+
+    
+
+    
+
+  </article>
+
+    
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          <a class="post-link" href="/uncategorized/KVM-virtual-machine-snapshot-backup.html">KVM virtual machine snapshot backup</a>
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-12-05
+        </span>
+        
+        
+      </div>
+    </header>
+
+    
+    
+
+    <div class="post-content">
+      
+        
+        
+          
+        
+
+        
+          <h1 id="KVM虚拟机快照备份"><a href="#KVM虚拟机快照备份" class="headerlink" title="KVM虚拟机快照备份"></a>KVM虚拟机快照备份</h1><pre><code>kvm虚拟机默认使用raw格式的镜像格式，性能最好，速度最快，它的缺点就是不支持一些新的功能，如支持镜像,zlib磁盘压缩,AES加密等。要使用镜像功能，磁盘格式必须为qcow2。
+</code></pre><h2 id="查看现有磁盘镜像格式与转换"><a href="#查看现有磁盘镜像格式与转换" class="headerlink" title="查看现有磁盘镜像格式与转换"></a>查看现有磁盘镜像格式与转换</h2><h3 id="查看磁盘格式"><a href="#查看磁盘格式" class="headerlink" title="查看磁盘格式"></a>查看磁盘格式</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-img info linux.img</span><br></pre></td></tr></table></figure>
+<h3 id="raw格式需要转换成qcow2"><a href="#raw格式需要转换成qcow2" class="headerlink" title="raw格式需要转换成qcow2"></a>raw格式需要转换成qcow2</h3>
+          <div class="read-more">
+            <a href="/uncategorized/KVM-virtual-machine-snapshot-backup.html" class="read-more-link">阅读更多</a>
+          </div>
+        
+      
+    </div>
+
+    
+
+    
+
+  </article>
+
+    
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          <a class="post-link" href="/KVM-Virtualization/KVM-virtual-machine-console-login-configuration.html">KVM virtual machine console login configuration</a>
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-12-04
+        </span>
+        
+          <div class="post-category">
+            
+              <a href="/categories/KVM-Virtualization/">KVM Virtualization</a>
+            
+          </div>
+        
+        
+      </div>
+    </header>
+
+    
+    
+
+    <div class="post-content">
+      
+        
+        
+          
+        
+
+        
+          <h1 id="KVM虚拟机控制台登录配置"><a href="#KVM虚拟机控制台登录配置" class="headerlink" title="KVM虚拟机控制台登录配置"></a>KVM虚拟机控制台登录配置</h1><pre><code>kvm虚拟机能否像xen虚拟机一样通过virsh console 一样采用字符界面进行linux虚拟机控制台呢，答案是肯定的，默认情况下该命令是不起作用的，需要修改相关文件才能实现。
+</code></pre><h2 id="配置方法如下"><a href="#配置方法如下" class="headerlink" title="配置方法如下"></a>配置方法如下</h2><h3 id="添加ttyS0的许可允许root登录"><a href="#添加ttyS0的许可允许root登录" class="headerlink" title="添加ttyS0的许可允许root登录"></a>添加ttyS0的许可允许root登录</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">"ttyS0"</span> &gt;&gt; /etc/securetty</span><br></pre></td></tr></table></figure>
+<h3 id="修改-etc-grub-conf文件"><a href="#修改-etc-grub-conf文件" class="headerlink" title="修改/etc/grub.conf文件"></a>修改/etc/grub.conf文件</h3>
+          <div class="read-more">
+            <a href="/KVM-Virtualization/KVM-virtual-machine-console-login-configuration.html" class="read-more-link">阅读更多</a>
+          </div>
+        
+      
+    </div>
+
+    
+
+    
+
+  </article>
+
+    
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          <a class="post-link" href="/KVM-Virtualization/KVM-virtual-machine-cloning.html">KVM virtual machine cloning</a>
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-12-03
+        </span>
+        
+          <div class="post-category">
+            
+              <a href="/categories/KVM-Virtualization/">KVM Virtualization</a>
+            
+          </div>
+        
+        
+      </div>
+    </header>
+
+    
+    
+
+    <div class="post-content">
+      
+        
+        
+          
+        
+
+        
+          <h1 id="KVM虚拟机克隆"><a href="#KVM虚拟机克隆" class="headerlink" title="KVM虚拟机克隆"></a>KVM虚拟机克隆</h1><pre><code>kvm虚拟机的克隆分为两种情况,KVM主机本机虚拟机直接克隆。通过复制配置文件与磁盘文件的虚拟机复制克隆(适用于异机的静态迁移)。
+</code></pre><h2 id="本机虚拟机直接克隆"><a href="#本机虚拟机直接克隆" class="headerlink" title="本机虚拟机直接克隆"></a>本机虚拟机直接克隆</h2><h3 id="开始克隆"><a href="#开始克隆" class="headerlink" title="开始克隆"></a>开始克隆</h3><pre><code>注: 以rhel6为源，克隆新的一台linux且定义新的磁盘文件为linux.img。
+</code></pre><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virt-clone -o rhel6 -n linux -f /usr/<span class="built_in">local</span>/src/linux.img</span><br></pre></td></tr></table></figure>
+          <div class="read-more">
+            <a href="/KVM-Virtualization/KVM-virtual-machine-cloning.html" class="read-more-link">阅读更多</a>
+          </div>
+        
+      
+    </div>
+
+    
+
+    
+
+  </article>
+
+    
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          <a class="post-link" href="/KVM-Virtualization/KVM-virtual-machine-installation.html">KVM virtual machine installation</a>
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-12-02
+        </span>
+        
+          <div class="post-category">
+            
+              <a href="/categories/KVM-Virtualization/">KVM Virtualization</a>
+            
+          </div>
+        
+        
+      </div>
+    </header>
+
+    
+    
+
+    <div class="post-content">
+      
+        
+        
+          
+        
+
+        
+          <h1 id="KVM-虚拟机安装"><a href="#KVM-虚拟机安装" class="headerlink" title="KVM 虚拟机安装"></a>KVM 虚拟机安装</h1><h2 id="上传ISO文件"><a href="#上传ISO文件" class="headerlink" title="上传ISO文件"></a>上传ISO文件</h2><pre><code>rhel-server-6.4-x86_64-dvd.iso
+cn_windows_server_2003_x64_dvd.iso
+</code></pre><h2 id="开始安装"><a href="#开始安装" class="headerlink" title="开始安装"></a>开始安装</h2><h3 id="raw格式磁盘"><a href="#raw格式磁盘" class="headerlink" title="raw格式磁盘"></a>raw格式磁盘</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virt-install --name=rhel6.4test01 --ram 512 --vcpus=1 --disk path=/data/test01.img,size=7,bus=virtio --accelerate --cdrom /data/iso/rhel-server-6.4-x86_64-dvd.iso --vnc --vncport=5910 --vnclisten=0.0.0.0 --network bridge=br0,model=virtio --noautoconsole</span><br></pre></td></tr></table></figure>
+          <div class="read-more">
+            <a href="/KVM-Virtualization/KVM-virtual-machine-installation.html" class="read-more-link">阅读更多</a>
+          </div>
+        
+      
+    </div>
+
+    
+
+    
+
+  </article>
+
+    
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
           <a class="post-link" href="/KVM-Virtualization/KVM-virtualization-environment-installation.html">KVM virtualization environment installation</a>
         
       </h1>
@@ -245,9 +502,7 @@
         
           <h1 id="KVM虚拟化环境安装"><a href="#KVM虚拟化环境安装" class="headerlink" title="KVM虚拟化环境安装"></a>KVM虚拟化环境安装</h1><pre><code>OS:CentOS release 6.8 (Final)
 </code></pre><h2 id="操作系统安装"><a href="#操作系统安装" class="headerlink" title="操作系统安装"></a>操作系统安装</h2><h3 id="修改内核模式为兼容内核启动"><a href="#修改内核模式为兼容内核启动" class="headerlink" title="修改内核模式为兼容内核启动"></a>修改内核模式为兼容内核启动</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed -i s/default=0/default=1/g /boot/grub/grub.conf</span><br></pre></td></tr></table></figure>
-<h3 id="关闭SeLinux"><a href="#关闭SeLinux" class="headerlink" title="关闭SeLinux"></a>关闭SeLinux</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed -i s/SELINUX=enforcing/SELINUX=disabled/g /etc/selinux/config</span><br></pre></td></tr></table></figure>
-<h3 id="关闭防火墙"><a href="#关闭防火墙" class="headerlink" title="关闭防火墙"></a>关闭防火墙</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chkconfig ip6tables off &amp;&amp; chkconfig iptables off</span><br></pre></td></tr></table></figure>
-<h3 id="重启"><a href="#重启" class="headerlink" title="重启"></a>重启</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reboot</span><br></pre></td></tr></table></figure>
+<h3 id="关闭SeLinux"><a href="#关闭SeLinux" class="headerlink" title="关闭SeLinux"></a>关闭SeLinux</h3>
           <div class="read-more">
             <a href="/KVM-Virtualization/KVM-virtualization-environment-installation.html" class="read-more-link">阅读更多</a>
           </div>

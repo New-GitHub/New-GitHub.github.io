@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="KVM virtual machine console login configuration"/>
+
+
+
+
+  <meta name="keywords" content="kvm, console, 记忆博客" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="记忆博客">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://c-cc-ccc.cc/KVM-Virtualization/KVM-virtual-machine-console-login-configuration.html"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+  <link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> KVM virtual machine console login configuration - 记忆博客 </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">记忆博客</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            首页
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            归档
+          
+        </li>
+      </a>
+    
+      <a href="/tags">
+        <li class="mobile-menu-item">
+          
+          
+            标签
+          
+        </li>
+      </a>
+    
+      <a href="/categories">
+        <li class="mobile-menu-item">
+          
+          
+            分类
+          
+        </li>
+      </a>
+    
+      <a href="/about">
+        <li class="mobile-menu-item">
+          
+          
+            关于
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">记忆博客</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              首页
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              归档
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/tags">
+            
+            
+              标签
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/categories">
+            
+            
+              分类
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/about">
+            
+            
+              关于
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          KVM virtual machine console login configuration
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-12-04
+        </span>
+        
+          <div class="post-category">
+            
+              <a href="/categories/KVM-Virtualization/">KVM Virtualization</a>
+            
+          </div>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#KVM虚拟机控制台登录配置"><span class="toc-text"><a href="#KVM&#x865A;&#x62DF;&#x673A;&#x63A7;&#x5236;&#x53F0;&#x767B;&#x5F55;&#x914D;&#x7F6E;" class="headerlink" title="KVM&#x865A;&#x62DF;&#x673A;&#x63A7;&#x5236;&#x53F0;&#x767B;&#x5F55;&#x914D;&#x7F6E;"></a>KVM&#x865A;&#x62DF;&#x673A;&#x63A7;&#x5236;&#x53F0;&#x767B;&#x5F55;&#x914D;&#x7F6E;</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#配置方法如下"><span class="toc-text"><a href="#&#x914D;&#x7F6E;&#x65B9;&#x6CD5;&#x5982;&#x4E0B;" class="headerlink" title="&#x914D;&#x7F6E;&#x65B9;&#x6CD5;&#x5982;&#x4E0B;"></a>&#x914D;&#x7F6E;&#x65B9;&#x6CD5;&#x5982;&#x4E0B;</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#添加ttyS0的许可允许root登录"><span class="toc-text"><a href="#&#x6DFB;&#x52A0;ttyS0&#x7684;&#x8BB8;&#x53EF;&#x5141;&#x8BB8;root&#x767B;&#x5F55;" class="headerlink" title="&#x6DFB;&#x52A0;ttyS0&#x7684;&#x8BB8;&#x53EF;&#x5141;&#x8BB8;root&#x767B;&#x5F55;"></a>&#x6DFB;&#x52A0;ttyS0&#x7684;&#x8BB8;&#x53EF;&#x5141;&#x8BB8;root&#x767B;&#x5F55;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#修改-etc-grub-conf文件"><span class="toc-text"><a href="#&#x4FEE;&#x6539;-etc-grub-conf&#x6587;&#x4EF6;" class="headerlink" title="&#x4FEE;&#x6539;/etc/grub.conf&#x6587;&#x4EF6;"></a>&#x4FEE;&#x6539;/etc/grub.conf&#x6587;&#x4EF6;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#修改-etc-inittab文件"><span class="toc-text"><a href="#&#x4FEE;&#x6539;-etc-inittab&#x6587;&#x4EF6;" class="headerlink" title="&#x4FEE;&#x6539;/etc/inittab&#x6587;&#x4EF6;"></a>&#x4FEE;&#x6539;/etc/inittab&#x6587;&#x4EF6;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#重启"><span class="toc-text"><a href="#&#x91CD;&#x542F;" class="headerlink" title="&#x91CD;&#x542F;"></a>&#x91CD;&#x542F;</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#测试virsh-console命令"><span class="toc-text"><a href="#&#x6D4B;&#x8BD5;virsh-console&#x547D;&#x4EE4;" class="headerlink" title="&#x6D4B;&#x8BD5;virsh console&#x547D;&#x4EE4;"></a>&#x6D4B;&#x8BD5;virsh console&#x547D;&#x4EE4;</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#退出"><span class="toc-text"><a href="#&#x9000;&#x51FA;" class="headerlink" title="&#x9000;&#x51FA;"></a>&#x9000;&#x51FA;</span></a></li></ol></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <h1 id="KVM虚拟机控制台登录配置"><a href="#KVM虚拟机控制台登录配置" class="headerlink" title="KVM虚拟机控制台登录配置"></a>KVM虚拟机控制台登录配置</h1><pre><code>kvm虚拟机能否像xen虚拟机一样通过virsh console 一样采用字符界面进行linux虚拟机控制台呢，答案是肯定的，默认情况下该命令是不起作用的，需要修改相关文件才能实现。
+</code></pre><h2 id="配置方法如下"><a href="#配置方法如下" class="headerlink" title="配置方法如下"></a>配置方法如下</h2><h3 id="添加ttyS0的许可允许root登录"><a href="#添加ttyS0的许可允许root登录" class="headerlink" title="添加ttyS0的许可允许root登录"></a>添加ttyS0的许可允许root登录</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">"ttyS0"</span> &gt;&gt; /etc/securetty</span><br></pre></td></tr></table></figure>
+<h3 id="修改-etc-grub-conf文件"><a href="#修改-etc-grub-conf文件" class="headerlink" title="修改/etc/grub.conf文件"></a>修改/etc/grub.conf文件</h3><a id="more"></a>
+<pre><code>/etc/grub.conf kernel 尾部添加 console=ttyS0
+</code></pre><h3 id="修改-etc-inittab文件"><a href="#修改-etc-inittab文件" class="headerlink" title="修改/etc/inittab文件"></a>修改/etc/inittab文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">"S0:12345:respawn:/sbin/agetty ttyS0 115200"</span> &gt;&gt; /etc/inittab</span><br></pre></td></tr></table></figure>
+<h3 id="重启"><a href="#重启" class="headerlink" title="重启"></a>重启</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reboot</span><br></pre></td></tr></table></figure>
+<h2 id="测试virsh-console命令"><a href="#测试virsh-console命令" class="headerlink" title="测试virsh console命令"></a>测试virsh console命令</h2><pre><code>注: 回车登录系统 若无响应或卡死 说明KVM没开启console
+</code></pre><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virsh console rhel6</span><br></pre></td></tr></table></figure>
+<h2 id="退出"><a href="#退出" class="headerlink" title="退出"></a>退出</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Ctrl+]</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+      
+      
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/kvm/">kvm</a>
+            
+              <a href="/tags/console/">console</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/uncategorized/KVM-virtual-machine-snapshot-backup.html">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">KVM virtual machine snapshot backup</span>
+        <span class="prev-text nav-mobile">上一篇</span>
+      </a>
+    
+    
+      <a class="next" href="/KVM-Virtualization/KVM-virtual-machine-cloning.html">
+        <span class="next-text nav-default">KVM virtual machine cloning</span>
+        <span class="prev-text nav-mobile">下一篇</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:devops@tom.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="copyright-year">
+    
+    &copy; 
+    
+    2017
+    <span class="author">Anonymous</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+
+
+
+    
+  
+
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>
